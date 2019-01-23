@@ -3,10 +3,6 @@ import class TrailBlazer.Open
 import typealias TrailBlazer.OpenFile
 import struct Foundation.CharacterSet
 
-public protocol ConfigParsable {
-    mutating func nextCharacter(_ position: inout ConfigParser.ParserPosition) throws -> Character
-}
-
 public struct ConfigParser {
     public static let SectionStart = Character("[")
     public static let SectionEnd = Character("]")
@@ -196,53 +192,8 @@ public struct ConfigParser {
     }
 }
 
-extension ConfigParser {
-    public struct ParserPosition: Equatable, CustomStringConvertible {
-        public private(set) var line: Int = 1
-        public private(set) var character: Int = 1
-
-        public var description: String {
-            return "ParserPosition(line: \(line), character: \(character))"
-        }
-
-        fileprivate init() {}
-
-        fileprivate mutating func step() {
-            character += 1
-        }
-
-        fileprivate mutating func newline() {
-            character = 1
-            line += 1
-        }
-    }
-}
-
-extension Open: ConfigParsable where PathType == FilePath {
-    private func readCharacter(using encoding: String.Encoding = .utf8) throws -> Character {
-        // TODO: Need some way to identify bytes in the encoding
-        guard let str = try read(bytes: 1, encoding: encoding) else {
-            throw StringError.notConvertibleFromData(using: encoding)
-        }
-
-        return str.isEmpty ? .ETX : Character(str)
-    }
-
-    public func nextCharacter(_ position: inout ConfigParser.ParserPosition) throws -> Character {
-        defer { position.step() }
-        return try readCharacter(using: ConfigParser.defaultEncoding)
-    }
-}
-
-extension String: ConfigParsable {
-    public mutating func nextCharacter(_ position: inout ConfigParser.ParserPosition) -> Character {
-        defer { position.step() }
-        return isEmpty ? .ETX : removeFirst()
-    }
-}
-
-fileprivate extension Character {
-    fileprivate static var ETX: Character { return Character(Unicode.Scalar(3)) }
+extension Character {
+    static var ETX: Character { return Character(Unicode.Scalar(3)) }
 }
 
 fileprivate extension CharacterSet {
