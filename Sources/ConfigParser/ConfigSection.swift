@@ -17,8 +17,9 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
         _dict = section._dict
     }
 
-    public init(title: String, data: [Key: Value] = [:]) {
+    public init(title: String, parent: Config? = nil, data: [Key: Value] = [:]) {
         self.title = title
+        self.parent = parent
         _dict = data
     }
 

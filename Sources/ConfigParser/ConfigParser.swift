@@ -37,58 +37,57 @@ public struct ConfigParser {
 
         repeat {
             // If we hit a newline, then skip it and get the next character
-            if CharacterSet.newlines.contains(nextChar) {
+            while CharacterSet.newlines.contains(nextChar) {
                 nextChar = try parsable.nextCharacter(&position)
                 position.newline()
                 parsedSection = false
             }
             
-            if nextChar.isEmpty {
+            if nextChar == .ETX {
                 break
             } else if nextChar == ConfigParser.SectionStart {
-                currentSection = try ConfigParser.identifySectionTitle(&parsable, &position)
+                currentSection = try ConfigParser.identifySectionTitle(&nextChar, &parsable, &position)
                 if config[currentSection] == nil {
-                    config[currentSection] = ConfigSection(title: currentSection)
+                    config[currentSection] = ConfigSection(title: currentSection, parent: config)
                 }
 
                 parsedSection = true
             } else if ConfigParser.InvalidGlobalCharacters.contains(nextChar) {
                 throw ParserError.invalidCharacter(nextChar, at: position)
             } else if ConfigParser.CommentCharacters.contains(nextChar) {
-                try ConfigParser.skipToNextLine(&parsable, &position)
+                try ConfigParser.skipToNextLine(&nextChar, &parsable, &position)
             } else if parsedSection && !CharacterSet.whitespaces.contains(nextChar) {
                 throw ParserError.expectedNewlineOrEOF(at: position)
+            } else if CharacterSet.whitespaces.contains(nextChar) {
+                // Do nothing if we hit whitespace in the global scope
             } else {
                 if config[currentSection] == nil {
-                    config[currentSection] = ConfigSection(title: currentSection)
+                    config[currentSection] = ConfigSection(title: currentSection, parent: config)
                 }
 
-                let key = try ConfigParser.parseKey(&parsable, &position)
-                let value = try ConfigParser.parseValue(&parsable, &position)
+                let key = try ConfigParser.parseKey(&nextChar, &parsable, &position)
+                let value = try ConfigParser.parseValue(&nextChar, &parsable, &position)
                 config[currentSection]![key] = value
             }
 
             if !CharacterSet.newlines.contains(nextChar) {
                 nextChar = try parsable.nextCharacter(&position)
             }
-        } while !nextChar.isEmpty
+        } while nextChar != .ETX
 
         return config
     }
 
-    private static func identifySectionTitle<ParseType: ConfigParsable>(_ parsable: inout ParseType, _ position: inout ParserPosition) throws -> String {
+    private static func identifySectionTitle<ParseType: ConfigParsable>(_ nextChar: inout Character, _ parsable: inout ParseType, _ position: inout ParserPosition) throws -> String {
         var sectionTitle = ""
-        var nextChar = try parsable.nextCharacter(&position)
+        nextChar = try parsable.nextCharacter(&position)
 
         while nextChar != ConfigParser.SectionEnd {
-            guard !nextChar.isEmpty else {
+            guard nextChar != .ETX else {
                 throw ParserError.unexpectedEOF(at: position)
             }
             guard !CharacterSet.newlines.contains(nextChar) else {
                 throw ParserError.unexpectedNewline(at: position)
-            }
-            guard !CharacterSet.whitespaces.contains(nextChar) else {
-                throw ParserError.unexpectedWhitespace(at: position)
             }
             guard !ConfigParser.InvalidSectionCharacters.contains(nextChar) else {
                 throw ParserError.invalidCharacter(nextChar, at: position)
@@ -106,13 +105,13 @@ public struct ConfigParser {
         return sectionTitle
     }
 
-    private static func parseKey<ParseType: ConfigParsable>(_ parsable: inout ParseType, _ position: inout ParserPosition) throws -> ConfigSection.Key {
-        var key = ""
-        var nextChar = try parsable.nextCharacter(&position)
+    private static func parseKey<ParseType: ConfigParsable>(_ nextChar: inout Character, _ parsable: inout ParseType, _ position: inout ParserPosition) throws -> ConfigSection.Key {
+        var key = "\(nextChar)"
+        nextChar = try parsable.nextCharacter(&position)
         var hitWhitespace = false
 
         while nextChar != ConfigParser.KeyValueSeparator {
-            guard !nextChar.isEmpty else {
+            guard nextChar != .ETX else {
                 throw ParserError.unexpectedEOF(at: position)
             }
             guard !CharacterSet.newlines.contains(nextChar) else {
@@ -142,15 +141,15 @@ public struct ConfigParser {
         return key
     }
 
-    private static func parseValue<ParseType: ConfigParsable>(_ parsable: inout ParseType, _ position: inout ParserPosition) throws -> ConfigSection.Value {
+    private static func parseValue<ParseType: ConfigParsable>(_ nextChar: inout Character, _ parsable: inout ParseType, _ position: inout ParserPosition) throws -> ConfigSection.Value {
+        nextChar = try parsable.nextCharacter(&position)
         var value = ""
-        var nextChar = try parsable.nextCharacter(&position)
         var startingQuote: Character? = nil
         var escaped = false
         var closedQuote = false
         var whitespaces: [Character] = []
 
-        while !nextChar.isEmpty && !CharacterSet.newlines.contains(nextChar) {
+        while nextChar != .ETX && !CharacterSet.newlines.contains(nextChar) {
             guard !ConfigParser.InvalidKeyValueCharacters.contains(nextChar) else {
                 throw ParserError.invalidCharacter(nextChar, at: position)
             }
@@ -169,6 +168,7 @@ public struct ConfigParser {
                 for char in whitespaces {
                     value.append(char)
                 }
+                whitespaces = []
                 value.append(nextChar)
                 escaped = false
             } else if !escaped && nextChar == startingQuote {
@@ -187,19 +187,23 @@ public struct ConfigParser {
         return value
     }
 
-    private static func skipToNextLine<ParseType: ConfigParsable>(_ parsable: inout ParseType, _ position: inout ParserPosition) throws {
-        var nextChar = try parsable.nextCharacter(&position)
+    private static func skipToNextLine<ParseType: ConfigParsable>(_ nextChar: inout Character, _ parsable: inout ParseType, _ position: inout ParserPosition) throws {
+        nextChar = try parsable.nextCharacter(&position)
 
-        while !nextChar.isEmpty && !CharacterSet.newlines.contains(nextChar) {
+        while nextChar != .ETX && !CharacterSet.newlines.contains(nextChar) {
             nextChar = try parsable.nextCharacter(&position)
         }
     }
 }
 
 extension ConfigParser {
-    public struct ParserPosition: Equatable {
+    public struct ParserPosition: Equatable, CustomStringConvertible {
         public private(set) var line: Int = 1
         public private(set) var character: Int = 1
+
+        public var description: String {
+            return "ParserPosition(line: \(line), character: \(character))"
+        }
 
         fileprivate init() {}
 
@@ -221,7 +225,7 @@ extension Open: ConfigParsable where PathType == FilePath {
             throw StringError.notConvertibleFromData(using: encoding)
         }
 
-        return Character(str)
+        return str.isEmpty ? .ETX : Character(str)
     }
 
     public func nextCharacter(_ position: inout ConfigParser.ParserPosition) throws -> Character {
@@ -233,12 +237,12 @@ extension Open: ConfigParsable where PathType == FilePath {
 extension String: ConfigParsable {
     public mutating func nextCharacter(_ position: inout ConfigParser.ParserPosition) -> Character {
         defer { position.step() }
-        return isEmpty ? removeFirst() : Character("")
+        return isEmpty ? .ETX : removeFirst()
     }
 }
 
 fileprivate extension Character {
-    fileprivate var isEmpty: Bool { return unicodeScalars.isEmpty }
+    fileprivate static var ETX: Character { return Character(Unicode.Scalar(3)) }
 }
 
 fileprivate extension CharacterSet {

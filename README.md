@@ -28,7 +28,7 @@ let value = config["section"]?["key"]
 - [ ] Write config to file
 - [ ] Escape sequences (bug fix)
 - [ ] Multi-line values
-- [ ] Read from string
+- [x] Read from string
 - [ ] Customizable options
   - [ ] Delimeter (ie: ':' instead of '=')
   - [ ] Don't trim whitespace
