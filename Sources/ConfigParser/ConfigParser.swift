@@ -12,18 +12,18 @@ public struct ConfigParser {
     /// The quotation characters
     private static let Quotes = Set([Character("\""), Character("'")])
     /// The escape character
-    public static let EscapeCharacter = Character("\\")
+    private static let EscapeCharacter = Character("\\")
 
     /// Characters not permitted as part of a section title
-    public lazy var invalidSectionCharacters = {
+    private lazy var invalidSectionCharacters = {
         Set([ConfigParser.SectionStart, options.keyValueSeparator]).union(options.commentCharacters)
     }()
     /// Character not permitted in either a key or a value
-    public lazy var invalidKeyValueCharacters = {
+    private lazy var invalidKeyValueCharacters = {
         Set([ConfigParser.SectionStart, ConfigParser.SectionEnd, options.keyValueSeparator]).union(options.commentCharacters)
     }()
     /// Characters not permitted in the global scope
-    public lazy var invalidGlobalCharacters = {
+    private lazy var invalidGlobalCharacters = {
         Set([ConfigParser.SectionEnd, options.keyValueSeparator])
     }()
 
