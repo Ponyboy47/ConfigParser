@@ -38,11 +38,9 @@ public struct ConfigParser {
         self.nextChar = try self.parsable.nextCharacter(options: self.options)
     }
 
-    @discardableResult
-    private mutating func nextCharacter(newline: Bool = false) throws -> Character {
+    private mutating func nextCharacter(newline: Bool = false) throws {
         defer { newline ? position.newline() : position.step() }
         nextChar = try parsable.nextCharacter(options: self.options)
-        return nextChar
     }
 
     /**
