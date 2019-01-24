@@ -3,7 +3,7 @@ import class TrailBlazer.Open
 
 /// Types that can be parsed by the ConfigParser, character by character, to generate a Config
 public protocol ConfigParsable {
-    mutating func nextCharacter(_ position: inout ParserPosition) throws -> Character
+    mutating func nextCharacter(options: ParserOptions) throws -> Character
 }
 
 extension Open: ConfigParsable where PathType == FilePath {
@@ -27,9 +27,8 @@ extension Open: ConfigParsable where PathType == FilePath {
     - Returns: Either the next character in the file, or the ETX character if the EOF has been reached
     - Warning: This will always throw if the file was encoded in such a way that characters are larger than one byte
     */
-    public func nextCharacter(_ position: inout ParserPosition) throws -> Character {
-        defer { position.step() }
-        return try readCharacter(using: ConfigParser.defaultEncoding)
+    public func nextCharacter(options: ParserOptions) throws -> Character {
+        return try readCharacter(using: options.fileEncoding)
     }
 }
 
@@ -41,9 +40,7 @@ extension String: ConfigParsable {
     - Parameter position: The ParserPosition to where we have currently read in the string
     - Returns: Either the first character from the string or the ETX character
     */
-    public mutating func nextCharacter(_ position: inout ParserPosition) -> Character {
-        defer { position.step() }
-
+    public mutating func nextCharacter(options: ParserOptions) -> Character {
         // Characters cannot be initialized from an empty string. When we have
         // finished processing the string, return the ETX character
         return isEmpty ? .ETX : removeFirst()
