@@ -13,3 +13,7 @@ public enum ParserError: Error {
     case expectedNewlineOrEOF(at: ParserPosition)
     case unexpectedCharacterOutsideQuotedValue(at: ParserPosition)
 }
+
+public enum ConfigRetrievalError<T: ConfigRetrievable>: Error {
+    case invalidValue(ConfigSection.Value, for: T.Type)
+}

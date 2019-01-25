@@ -52,10 +52,10 @@ public struct ConfigParser {
     */
     public static func read(from configPath: FilePath, options: ParserOptions = .default) throws -> Config {
         // Expand the path (in case it's relative) and then open it for reading
-        var openConfig = try configPath.expanded().open(permissions: .read)
+        let openConfig = try configPath.expanded().open(permissions: .read)
 
         // Pass the readable config to the parser
-        return try ConfigParser.parse(&openConfig, options: options)
+        return try ConfigParser.parse(openConfig, options: options)
     }
 
     /**
@@ -64,7 +64,7 @@ public struct ConfigParser {
     - Parameter parsable: A type conforming to ConfigParsable which can be read character by character
     - Returns: A Config object
     */
-    public static func parse<ParseType: ConfigParsable>(_ parsable: inout ParseType, options: ParserOptions = .default) throws -> Config {
+    public static func parse<ParseType: ConfigParsable>(_ parsable: ParseType, options: ParserOptions = .default) throws -> Config {
         // Create our empty Config
         let config = Config()
         var parser = try ConfigParser(parsable, options: options)
