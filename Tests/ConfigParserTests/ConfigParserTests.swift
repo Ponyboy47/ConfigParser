@@ -5,6 +5,7 @@ final class ConfigParserTests: XCTestCase {
     func testParseString() {
         let contents = """
         global_opt = 10
+        global_opt1 = 11
 
         ; Comment type 1
         # Comment type 2
@@ -38,7 +39,7 @@ final class ConfigParserTests: XCTestCase {
         XCTAssertTrue(sections.contains("section_title_2"))
         XCTAssertTrue(sections.contains("trimming"))
         XCTAssertTrue(sections.contains("last"))
-        XCTAssertEqual(config.globals, ["global_opt": "10"])
+        XCTAssertEqual(config.globals, ["global_opt": "10", "global_opt1": "11"])
         XCTAssertEqual(config["section title"], ["section_opt": "hello"])
         XCTAssertEqual(config["trimming"]!["trim_section"], "This should trim the trailing spaces")
         XCTAssertEqual(config["last"]!["last_section"], "This is a quoted value")
@@ -127,9 +128,54 @@ final class ConfigParserTests: XCTestCase {
         XCTAssertEqual(config[section: "section title", key: "section_opt"], "world")
     }
 
+    func testGenerate() {
+        let contents = """
+        global_opt = 10
+
+        ; Comment type 1
+        # Comment type 2
+
+        [DEFAULTS]
+        default_opt = default
+
+        [section title]
+        section_opt = hello
+
+        [section_title_2]
+        new_section_opt = world
+
+        [trimming]
+        trim_section =   This should trim the trailing spaces   
+
+        [last]
+        last_section = "This is a quoted value"
+        """
+
+        let config1: Config
+        do {
+            config1 = try ConfigParser.parse(contents)
+        } catch {
+            XCTFail("Failed to parse string with error: \(error)")
+            return
+        }
+
+        let generated = config1.output()
+
+        let config2: Config
+        do {
+            config2 = try ConfigParser.parse(generated)
+        } catch {
+            XCTFail("Failed to parse string with error: \(error)")
+            return
+        }
+
+        XCTAssertEqual(config1, config2)
+    }
+
     static var allTests = [
         ("testParseString", testParseString),
         ("testParseTypes", testParseTypes),
         ("testSubscripts", testSubscripts),
+        ("testGenerate", testGenerate),
     ]
 }
