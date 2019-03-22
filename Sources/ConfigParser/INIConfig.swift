@@ -1,3 +1,6 @@
+import struct TrailBlazer.FilePath
+import struct TrailBlazer.FileMode
+
 public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLiteral, Hashable 
                            where Key == String, Value == ConfigSection {
     /// The array element type
@@ -100,5 +103,73 @@ extension INIConfig {
     }
     public subscript(section key: Key, key item: ConfigSection.Key, default: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
+    }
+}
+
+// Useful file operations
+extension INIConfig {
+    public init(from configPath: FilePath, options: ParserOptions = .default) throws {
+        self = try ConfigParser.read(from: configPath, options: options)
+    }
+
+    public func output(options: ParserOptions = .default) -> String {
+        var config = String()
+
+        for (key, value) in globals._dict {
+            config += key
+            config += " = "
+            config += value
+            config += "\n"
+        }
+
+        if !defaults.isEmpty {
+            if !globals.isEmpty {
+                config += "\n"
+            }
+
+            config.append(ConfigParser.SectionStart)
+            config += Self.DefaultsKey
+            config.append(ConfigParser.SectionEnd)
+            config += "\n"
+
+            for (key, value) in defaults._dict {
+                config += key
+                config += " = "
+                config += value
+                config += "\n"
+            }
+        }
+
+        if !_dict.isEmpty && (!defaults.isEmpty || (!globals.isEmpty && defaults.isEmpty)) {
+            var index = _dict.startIndex
+            while index != _dict.endIndex {
+                var (sectionTitle, section) = _dict[index]
+
+                config.append(ConfigParser.SectionStart)
+                config += sectionTitle
+                config.append(ConfigParser.SectionEnd)
+                config += "\n"
+
+                for (key, value) in section._dict {
+                    config += key
+                    config += " = "
+                    config += value
+                    config += "\n"
+                }
+
+                index = _dict.index(after: index)
+                if index != _dict.endIndex {
+                    config += "\n"
+                }
+            }
+        }
+
+        return config
+    }
+
+    public func save(to path: FilePath, options: ParserOptions = .default, mode: FileMode = .init(owner: .all, group: .readWrite, others: .read)) throws {
+        try path.open(permissions: .write, flags: [.create, .truncate], mode: mode) { opened in
+            try opened.write(output(options: options))
+        }
     }
 }

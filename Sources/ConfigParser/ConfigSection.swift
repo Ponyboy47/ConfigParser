@@ -8,6 +8,8 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
     /// The underlying storage of the section
     var _dict: [Key: Value]
 
+    public var isEmpty: Bool { return _dict.isEmpty }
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(title)
         hasher.combine(_dict)
