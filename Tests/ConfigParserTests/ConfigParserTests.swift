@@ -33,7 +33,7 @@ final class ConfigParserTests: XCTestCase {
             return
         }
 
-        let sections = Array(config.sections())
+        let sections = Array(config.sections)
         XCTAssertTrue(sections.contains("section title"))
         XCTAssertTrue(sections.contains("section_title_2"))
         XCTAssertTrue(sections.contains("trimming"))
@@ -42,7 +42,7 @@ final class ConfigParserTests: XCTestCase {
         XCTAssertEqual(config["section title"], ["section_opt": "hello"])
         XCTAssertEqual(config["trimming"]!["trim_section"], "This should trim the trailing spaces")
         XCTAssertEqual(config["last"]!["last_section"], "This is a quoted value")
-        XCTAssertEqual(config["last", "default_opt"], "default")
+        XCTAssertEqual(config[section: "last", key: "default_opt"], "default")
     }
 
     func testParseTypes() {
@@ -91,8 +91,45 @@ final class ConfigParserTests: XCTestCase {
         XCTAssertEqual(try! config.globals.get(key: "array4")!, [1.2, 3.4, 5.6, 7.8])
     }
 
+    func testSubscripts() {
+        let contents = """
+        global_opt = 10
+
+        ; Comment type 1
+        # Comment type 2
+
+        [DEFAULTS]
+        default_opt = default
+
+        [section title]
+        section_opt = hello
+
+        [section_title_2]
+        new_section_opt = world
+
+        [trimming]
+        trim_section =   This should trim the trailing spaces   
+
+        [last]
+        last_section = "This is a quoted value"
+        """
+
+        var config: Config
+        do {
+            config = try ConfigParser.parse(contents)
+        } catch {
+            XCTFail("Failed to parse string with error: \(error)")
+            return
+        }
+
+        XCTAssertEqual(config[section: "section title", key: "section_opt"], "hello")
+        config[section: "section title", key: "section_opt"] = "world"
+        XCTAssertEqual(config[section: "section title", key: "section_opt"], "world")
+    }
+
     static var allTests = [
         ("testParseString", testParseString),
         ("testParseTypes", testParseTypes),
+        ("testSubscripts", testSubscripts),
     ]
 }
