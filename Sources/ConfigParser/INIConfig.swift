@@ -140,27 +140,29 @@ extension INIConfig {
             }
         }
 
-        if !_dict.isEmpty && (!defaults.isEmpty || (!globals.isEmpty && defaults.isEmpty)) {
-            var index = _dict.startIndex
-            while index != _dict.endIndex {
-                var (sectionTitle, section) = _dict[index]
+        if !_dict.isEmpty && (!defaults.isEmpty || !globals.isEmpty) {
+            config += "\n"
+        }
 
-                config.append(ConfigParser.SectionStart)
-                config += sectionTitle
-                config.append(ConfigParser.SectionEnd)
+        var index = _dict.startIndex
+        while index != _dict.endIndex {
+            let (sectionTitle, section) = _dict[index]
+
+            config.append(ConfigParser.SectionStart)
+            config += sectionTitle
+            config.append(ConfigParser.SectionEnd)
+            config += "\n"
+
+            for (key, value) in section._dict {
+                config += key
+                config += " = "
+                config += value
                 config += "\n"
+            }
 
-                for (key, value) in section._dict {
-                    config += key
-                    config += " = "
-                    config += value
-                    config += "\n"
-                }
-
-                index = _dict.index(after: index)
-                if index != _dict.endIndex {
-                    config += "\n"
-                }
+            index = _dict.index(after: index)
+            if index != _dict.endIndex {
+                config += "\n"
             }
         }
 
