@@ -70,7 +70,7 @@ public struct ConfigParser {
         var parser = try ConfigParser(parsable, options: options)
 
         // Until we hit our first section, we're a part of the global section
-        var currentSection: String = Config.GlobalKey
+        var currentSection: String = Config.GlobalsKey
         // Track when we've parsed a section title so we can throw if we
         // encounter an invalid character outside the section markers
         var parsedSection = false
@@ -88,7 +88,9 @@ public struct ConfigParser {
                 break
             } else if parser.nextChar == ConfigParser.SectionStart {
                 currentSection = try parser.identifySectionTitle()
-                if config[currentSection] == nil {
+                if config[currentSection] == nil
+                   && currentSection != ConfigType.GlobalsKey
+                   && currentSection != ConfigType.DefaultsKey {
                     config[currentSection] = ConfigSection(title: currentSection)
                 }
 

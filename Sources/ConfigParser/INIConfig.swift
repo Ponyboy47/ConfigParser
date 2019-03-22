@@ -7,7 +7,7 @@ public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLit
     typealias Element = Value
 
     /// The section key relating to global elements
-    static var GlobalKey: Key { get }
+    static var GlobalsKey: Key { get }
     /// The section key relating to the default elements
     static var DefaultsKey: Key { get }
 
@@ -76,7 +76,7 @@ extension INIConfig {
     public func contains(section key: Key) -> Bool { return keys.contains(key) }
 
     public func section(withKey key: ConfigSection.Key) -> ConfigSection? {
-        if key == Self.GlobalKey {
+        if key == Self.GlobalsKey {
             return globals
         } else if key == Self.DefaultsKey {
             return defaults
@@ -86,12 +86,13 @@ extension INIConfig {
     public subscript(_ section: Key) -> ConfigSection? {
         get { return self.section(withKey: section) }
         set {
-            if section == Self.GlobalKey {
+            if section == Self.GlobalsKey {
                 globals = newValue ?? [:]
             } else if section == Self.DefaultsKey {
                 defaults = newValue ?? [:]
+            } else {
+                _dict[section] = newValue
             }
-            _dict[section] = newValue
         }
     }
 

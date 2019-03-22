@@ -1,6 +1,6 @@
 open class Config: INIConfig {
     /// The section key relating to global elements
-    public static let GlobalKey = "GLOBALS"
+    public static let GlobalsKey = "GLOBALS"
     /// The section key relating to the default elements
     public static let DefaultsKey = "DEFAULTS"
 
