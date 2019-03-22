@@ -168,7 +168,7 @@ extension INIConfig {
     }
 
     public func save(to path: FilePath, options: ParserOptions = .default, mode: FileMode = .init(owner: .all, group: .readWrite, others: .read)) throws {
-        try path.open(permissions: .write, flags: [.create, .truncate], mode: mode) { opened in
+        try (path.absolute ?? path).open(permissions: .write, flags: [.create, .truncate], mode: mode) { opened in
             try opened.write(output(options: options))
         }
     }
