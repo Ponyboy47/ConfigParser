@@ -50,7 +50,7 @@ public struct ConfigParser {
     - Parameter encoding: The encoding to use when reading the file
     - Returns: A Config after reading the FilePath
     */
-    public static func read(from configPath: FilePath, options: ParserOptions = .default) throws -> Config {
+    public static func read<ConfigType: INIConfig>(from configPath: FilePath, options: ParserOptions = .default) throws -> ConfigType {
         // Expand the path (in case it's relative) and then open it for reading
         let openConfig = try configPath.expanded().open(permissions: .read)
 
@@ -64,9 +64,9 @@ public struct ConfigParser {
     - Parameter parsable: A type conforming to ConfigParsable which can be read character by character
     - Returns: A Config object
     */
-    public static func parse<ParseType: ConfigParsable>(_ parsable: ParseType, options: ParserOptions = .default) throws -> Config {
+    public static func parse<ParseType: ConfigParsable, ConfigType: INIConfig>(_ parsable: ParseType, options: ParserOptions = .default) throws -> ConfigType {
         // Create our empty Config
-        let config = Config()
+        var config = ConfigType()
         var parser = try ConfigParser(parsable, options: options)
 
         // Until we hit our first section, we're a part of the global section
