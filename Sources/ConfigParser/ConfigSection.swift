@@ -49,13 +49,13 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
     /// Returns a value for the specified key or nil if it doesn't exist
     public subscript(key: Key) -> [Value]? {
         get { return _dict[key]?.components(separatedBy: ",").map({ return $0.trimmingCharacters(in: .whitespaces) }) }
-        set { _dict[key] = newValue?.joined(separator: ",") }
+        mutating set { _dict[key] = newValue?.joined(separator: ",") }
     }
 
     /// Returns a value for the specified key or nil if it doesn't exist
     public subscript(key: Key) -> Value? {
         get { return _dict[key] }
-        set { _dict[key] = newValue }
+        mutating set { _dict[key] = newValue }
     }
 
     public subscript<T: ConfigRetrievable>(key: Key, default: T) -> T {
@@ -68,7 +68,7 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
             guard let value = _dict[key] else { return nil }
             return T.from(value: value)
         }
-        set {
+        mutating set {
             self[key] = newValue?.toValue()
         }
     }

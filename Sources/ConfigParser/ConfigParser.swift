@@ -91,7 +91,7 @@ public struct ConfigParser {
                 if config[currentSection] == nil
                    && currentSection != ConfigType.GlobalsKey
                    && currentSection != ConfigType.DefaultsKey {
-                    config[currentSection] = ConfigSection(title: currentSection)
+                    config._dict[currentSection] = ConfigSection(title: currentSection)
                 }
 
                 parsedSection = true
@@ -106,7 +106,13 @@ public struct ConfigParser {
             } else {
                 let key = try parser.parseKey()
                 let value = try parser.parseValue()
-                config[currentSection]![key] = value
+                if currentSection == ConfigType.GlobalsKey {
+                    config.globals[key] = value
+                } else if currentSection == ConfigType.DefaultsKey {
+                    config.defaults[key] = value
+                } else {
+                    config._dict[currentSection]![key] = value
+                }
             }
 
             if !CharacterSet.newlines.contains(parser.nextChar) {

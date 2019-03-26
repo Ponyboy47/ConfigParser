@@ -13,4 +13,32 @@ open class Config: INIConfig {
 
     /// Empty initializer
     public required init() {}
+
+    public subscript(_ section: Key) -> ConfigSection? {
+        get { return self.section(withKey: section) }
+        set {
+            if section == Config.GlobalsKey {
+                globals = newValue ?? [:]
+            } else if section == Config.DefaultsKey {
+                defaults = newValue ?? [:]
+            } else {
+                _dict[section] = newValue
+            }
+        }
+    }
+
+    public subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
+        get { return _dict[key]?[item] ?? globals[item] ?? defaults[item] }
+        set { _dict[key]?[item] = newValue }
+    }
+
+    public subscript<T: ConfigStorable>(section key: Key, key item: ConfigSection.Key) -> T? {
+        get {
+            guard let value: ConfigSection.Value = self[section: key, key: item] else { return nil }
+            return T.from(value: value)
+        }
+        set {
+            self[section: key, key: item] = newValue?.toValue()
+        }
+    }
 }

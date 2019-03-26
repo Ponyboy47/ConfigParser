@@ -77,40 +77,26 @@ public extension INIConfig {
         }
         return _dict[key]
     }
-    subscript(_ section: Key) -> ConfigSection? {
-        get { return self.section(withKey: section) }
-        set {
-            if section == Self.GlobalsKey {
-                globals = newValue ?? [:]
-            } else if section == Self.DefaultsKey {
-                defaults = newValue ?? [:]
-            } else {
-                _dict[section] = newValue
-            }
-        }
-    }
 
     func get(default key: ConfigSection.Key) -> ConfigSection.Value? { return defaults[key] }
     func get(global key: ConfigSection.Key) -> ConfigSection.Value? { return globals[key] }
-    subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
-        get { return _dict[key]?[item] ?? globals[item] ?? defaults[item] }
-        set { _dict[key]?[item] = newValue }
-    }
     subscript(section key: Key, key item: ConfigSection.Key, default `default`: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
+    }
+    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key) -> T? {
+        guard let value = self[section: key, key: item] else { return nil }
+        return T.from(value: value)
     }
     subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default `default`: T) -> T {
         guard let value = self[section: key, key: item] else { return `default` }
         return T.from(value: value) ?? `default`
     }
-    subscript<T: ConfigStorable>(section key: Key, key item: ConfigSection.Key) -> T? {
-        get {
-            guard let value: ConfigSection.Value = self[section: key, key: item] else { return nil }
-            return T.from(value: value)
-        }
-        set {
-            self[section: key, key: item] = newValue?.toValue()
-        }
+
+    subscript(_ section: Key) -> ConfigSection? {
+        return self.section(withKey: section)
+    }
+    subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
+        return _dict[key]?[item] ?? globals[item] ?? defaults[item]
     }
 
 /// pragma: Useful file operations
