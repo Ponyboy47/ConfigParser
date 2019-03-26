@@ -96,10 +96,10 @@ public extension INIConfig {
         get { return _dict[key]?[item] ?? globals[item] ?? defaults[item] }
         set { _dict[key]?[item] = newValue }
     }
-    subscript(section key: Key, key item: ConfigSection.Key, default: ConfigSection.Value) -> ConfigSection.Value {
+    subscript(section key: Key, key item: ConfigSection.Key, default `default`: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
     }
-    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default: T) -> T {
+    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default `default`: T) -> T {
         guard let value = self[section: key, key: item] else { return `default` }
         return T.from(value: value) ?? `default`
     }
