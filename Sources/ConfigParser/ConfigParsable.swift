@@ -46,4 +46,3 @@ extension String: ConfigParsable {
         return isEmpty ? .ETX : removeFirst()
     }
 }
-

@@ -239,14 +239,14 @@ public struct ConfigParser {
     }
 }
 
-extension Character {
+public extension Character {
     /// The End of Text Character
-    public static var ETX: Character { return Character(Unicode.Scalar(3)) }
+    static var ETX: Character { return Character(Unicode.Scalar(3)) }
 }
 
 fileprivate extension CharacterSet {
     /// Checks if the CharacterSet contains the specified Character
-    fileprivate func contains(_ char: Character) -> Bool {
+    func contains(_ char: Character) -> Bool {
         for scalar in char.unicodeScalars {
             if contains(scalar) {
                 return true

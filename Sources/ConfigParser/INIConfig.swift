@@ -22,23 +22,21 @@ public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLit
     init()
 }
 
-// Equatable & Hashable conformance
-extension INIConfig {
-    public func hash(into hasher: inout Hasher) {
+public extension INIConfig {
+/// pragma: Equatable & Hashable conformance
+    func hash(into hasher: inout Hasher) {
         hasher.combine(defaults)
         hasher.combine(globals)
         hasher.combine(_dict)
     }
 
-    public static func == (lhs: Self, rhs: Self) -> Bool { return lhs._dict == rhs._dict }
-    public static func == <R: INIConfig>(lhs: Self, rhs: R) -> Bool { return lhs._dict == rhs._dict }
-    public static func == <L: INIConfig>(lhs: L, rhs: Self) -> Bool { return lhs._dict == rhs._dict }
-}
+    static func == (lhs: Self, rhs: Self) -> Bool { return lhs._dict == rhs._dict }
+    static func == <R: INIConfig>(lhs: Self, rhs: R) -> Bool { return lhs._dict == rhs._dict }
+    static func == <L: INIConfig>(lhs: L, rhs: Self) -> Bool { return lhs._dict == rhs._dict }
 
-// ExpressibleByDictionaryLiteral conformance
-extension INIConfig {
+/// pragma: ExpressibleByDictionaryLiteral conformance
     /// Dictionary literal initializer
-    public init(dictionaryLiteral elements: (Key, Value)...) {
+    init(dictionaryLiteral elements: (Key, Value)...) {
         self.init()
 
         for (key, var value) in elements {
@@ -46,26 +44,22 @@ extension INIConfig {
             _dict[key] = value
         }
     }
-}
 
-// ExpressibleByArrayLiteral conformance
-extension INIConfig {
+/// pragma: ExpressibleByArrayLiteral conformance
     /// Array literal initializer
-    public init(arrayLiteral elements: Element...) {
+    init(arrayLiteral elements: Element...) {
         self.init()
 
         for section in elements {
             _dict[section.title] = section
         }
     }
-}
 
-// Dict-like functionality
-extension INIConfig {
+/// pragma: Dict-like functionality
     /// A view of the available sections in the INIConfig
-    public var sections: Dictionary<Key, Value>.Keys { return _dict.keys }
+    var sections: Dictionary<Key, Value>.Keys { return _dict.keys }
     /// A view of the available sections in the INIConfig
-    public var keys: Dictionary<Key, Value>.Keys { return sections }
+    var keys: Dictionary<Key, Value>.Keys { return sections }
 
     /**
     Determine if the config has values for the specified section
@@ -73,9 +67,9 @@ extension INIConfig {
     - Parameter section: The section to search for in the config
     - Returns: Whether or not the section exists in the config
     */
-    public func contains(section key: Key) -> Bool { return keys.contains(key) }
+    func contains(section key: Key) -> Bool { return keys.contains(key) }
 
-    public func section(withKey key: ConfigSection.Key) -> ConfigSection? {
+    func section(withKey key: ConfigSection.Key) -> ConfigSection? {
         if key == Self.GlobalsKey {
             return globals
         } else if key == Self.DefaultsKey {
@@ -83,7 +77,7 @@ extension INIConfig {
         }
         return _dict[key]
     }
-    public subscript(_ section: Key) -> ConfigSection? {
+    subscript(_ section: Key) -> ConfigSection? {
         get { return self.section(withKey: section) }
         set {
             if section == Self.GlobalsKey {
@@ -96,24 +90,22 @@ extension INIConfig {
         }
     }
 
-    public func get(default key: ConfigSection.Key) -> ConfigSection.Value? { return defaults[key] }
-    public func get(global key: ConfigSection.Key) -> ConfigSection.Value? { return globals[key] }
-    public subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
+    func get(default key: ConfigSection.Key) -> ConfigSection.Value? { return defaults[key] }
+    func get(global key: ConfigSection.Key) -> ConfigSection.Value? { return globals[key] }
+    subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
         get { return _dict[key]?[item] ?? globals[item] ?? defaults[item] }
         set { _dict[key]?[item] = newValue }
     }
-    public subscript(section key: Key, key item: ConfigSection.Key, default: ConfigSection.Value) -> ConfigSection.Value {
+    subscript(section key: Key, key item: ConfigSection.Key, default: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
     }
-}
 
-// Useful file operations
-extension INIConfig {
-    public init(from configPath: FilePath, options: ParserOptions = .default) throws {
+/// pragma: Useful file operations
+    init(from configPath: FilePath, options: ParserOptions = .default) throws {
         self = try ConfigParser.read(from: configPath, options: options)
     }
 
-    public func output(options: ParserOptions = .default) -> String {
+    func output(options: ParserOptions = .default) -> String {
         var config = String()
 
         for (key, value) in globals._dict {
@@ -170,7 +162,7 @@ extension INIConfig {
         return config
     }
 
-    public func save(to path: FilePath, options: ParserOptions = .default, mode: FileMode = .init(owner: .all, group: .readWrite, others: .read)) throws {
+    func save(to path: FilePath, options: ParserOptions = .default, mode: FileMode = .init(owner: .all, group: .readWrite, others: .read)) throws {
         try (path.absolute ?? path).open(permissions: .write, flags: [.create, .truncate], mode: mode) { opened in
             try opened.write(output(options: options))
         }

@@ -24,8 +24,8 @@ extension Bool: ConfigStorable {
     public func toValue() -> ConfigSection.Value { return self ? "true" : "false" }
 }
 
-extension Numeric {
-    public func toValue() -> ConfigSection.Value { return "\(self)" }
+public extension Numeric {
+    func toValue() -> ConfigSection.Value { return "\(self)" }
 }
 
 extension Int8: ConfigStorable {
