@@ -5,7 +5,7 @@ A pure-Swift implementation of the INI config parser
 ## Installation
 ### Swift Package Manager
 ```swift
-.package(url: "https://github.com/Ponyboy47/ConfigParser.git", from: "0.3.0")
+.package(url: "https://github.com/Ponyboy47/ConfigParser.git", from: "0.3.1")
 ```
 
 ## Usage
@@ -24,18 +24,9 @@ key2 = 1234
 
 let config = try ConfigParser.parse(confString)
 
-// Subscripting will always return a String value
-let key1: String? = config["section1"]?["key1"] // value1
-let key1 = config["section2"]?["key1"] // test
-let key2 = config["section1"]?["key2"] // nil
-
-// You can automatically cast to others like so:
-let key2: Int = try config["section2"]?.get(key: "key2") // 1234
-// or
-let key2 = try config["section2"]?.getInt(key: "key2") // 1234
-
-// You can retrieve arrays like so:
-let array: [Int] = try config["section1"]?.get(key: "key2") // [1, 2, 3, 4]
+// Use subscripts to get the value you want in the type you want
+let key1s1: String? = config[section: "section1", key: "key1"] // Optional<String>(value1)
+let key2s1 = config[section: "section2", key: "key1", default: [4, 3, 2, 1]] // [1, 2, 3, 4]
 ```
 Supported Types:
 - String
@@ -53,7 +44,7 @@ Supported Types:
   - [x] Double/Float
   - [x] Int
   - [x] Array
-- [ ] Write config to file
+- [x] Write config to file
 - [ ] Escape sequences (bug fix)
 - [ ] Multi-line values
 - [x] Read from string
