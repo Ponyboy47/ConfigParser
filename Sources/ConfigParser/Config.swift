@@ -29,7 +29,18 @@ open class Config: INIConfig {
 
     public subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
         get { return _dict[key]?[item] ?? globals[item] ?? defaults[item] }
-        set { _dict[key]?[item] = newValue }
+        set {
+            if key == Config.GlobalsKey {
+                globals[item] = newValue
+            } else if key == Config.DefaultsKey {
+                defaults[item] = newValue
+            } else {
+                if !_dict.keys.contains(key) {
+                    _dict[key] = ConfigSection(title: key)
+                }
+                _dict[key]![item] = newValue
+            }
+        }
     }
 
     public subscript<T: ConfigStorable>(section key: Key, key item: ConfigSection.Key) -> T? {
