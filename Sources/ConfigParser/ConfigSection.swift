@@ -58,9 +58,29 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
         set { _dict[key] = newValue }
     }
 
-    public func get<T: ConfigRetrievable>(key: Key) throws -> T? {
+    public subscript<T: ConfigRetrievable>(key: Key, default: T) -> T {
+        guard let value = _dict[key] else { return `default` }
+        return T.from(value: value) ?? `default`
+    }
+
+    public subscript<T: ConfigStorable>(key: Key) -> T? {
+        get {
+            guard let value = _dict[key] else { return nil }
+            return T.from(value: value)
+        }
+        set {
+            self[key] = newValue?.toValue()
+        }
+    }
+
+    public func get<T: ConfigRetrievable>(key: Key) -> T? {
         guard let value = _dict[key] else { return nil }
-        return try T.from(value: value)
+        return T.from(value: value)
+    }
+
+    public func get<T: ConfigRetrievable>(key: Key, default: T) -> T {
+        guard let value = _dict[key] else { return `default` }
+        return T.from(value: value) ?? `default`
     }
 
     public mutating func set<T: ConfigStorable>(key: Key, value newValue: T?) {

@@ -99,6 +99,19 @@ public extension INIConfig {
     subscript(section key: Key, key item: ConfigSection.Key, default: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
     }
+    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default: T) -> T {
+        guard let value = self[section: key, key: item] else { return `default` }
+        return T.from(value: value) ?? `default`
+    }
+    subscript<T: ConfigStorable>(section key: Key, key item: ConfigSection.Key) -> T? {
+        get {
+            guard let value: ConfigSection.Value = self[section: key, key: item] else { return nil }
+            return T.from(value: value)
+        }
+        set {
+            self[section: key, key: item] = newValue?.toValue()
+        }
+    }
 
 /// pragma: Useful file operations
     init(from configPath: FilePath, options: ParserOptions = .default) throws {

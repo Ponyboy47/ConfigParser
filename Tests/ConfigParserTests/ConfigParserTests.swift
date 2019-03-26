@@ -74,22 +74,23 @@ final class ConfigParserTests: XCTestCase {
             return
         }
 
+        XCTAssertEqual(config[section: "GLOBALS", key: "str"], "this is a string")
         XCTAssertEqual(config.globals["str"], "this is a string")
-        XCTAssertTrue(try! config.globals.getBool(key: "bool1")!)
-        XCTAssertTrue(try! config.globals.getBool(key: "bool2")!)
-        XCTAssertTrue(try! config.globals.getBool(key: "bool3")!)
-        XCTAssertTrue(try! config.globals.getBool(key: "bool4")!)
-        XCTAssertFalse(try! config.globals.getBool(key: "bool5")!)
-        XCTAssertFalse(try! config.globals.getBool(key: "bool6")!)
-        XCTAssertFalse(try! config.globals.getBool(key: "bool7")!)
-        XCTAssertFalse(try! config.globals.getBool(key: "bool8")!)
-        XCTAssertEqual(try! config.globals.getInt(key: "int")!, -123)
-        XCTAssertEqual(try! config.globals.getUInt(key: "uint")!, 123)
-        XCTAssertEqual(try! config.globals.getDouble(key: "decimal")!, 12.34)
+        XCTAssertTrue(config.globals["bool1"]!)
+        XCTAssertTrue(config.globals["bool2"]!)
+        XCTAssertTrue(config.globals["bool3"]!)
+        XCTAssertTrue(config.globals["bool4"]!)
+        XCTAssertFalse(config.globals["bool5"]!)
+        XCTAssertFalse(config[section: "GLOBALS", key: "bool6"]!)
+        XCTAssertFalse(config.globals["bool7"]!)
+        XCTAssertFalse(config.globals["bool8"]!)
+        XCTAssertEqual(config.globals["int"]!, -123)
+        XCTAssertEqual(config.globals["uint"]!, UInt(123))
+        XCTAssertEqual(config.globals["decimal"]!, 12.34)
         XCTAssertEqual(config.globals["array1"]!, ["this", "is", "an", "array"])
-        XCTAssertEqual(try! config.globals.get(key: "array2")!, [true, false, true, false])
-        XCTAssertEqual(try! config.globals.get(key: "array3")!, [1, 2, 3, 4])
-        XCTAssertEqual(try! config.globals.get(key: "array4")!, [1.2, 3.4, 5.6, 7.8])
+        XCTAssertEqual(config.globals.get(key: "array2")!, [true, false, true, false])
+        XCTAssertEqual(config.globals.get(key: "array3")!, [1, 2, 3, 4])
+        XCTAssertEqual(config.globals.get(key: "array4")!, [1.2, 3.4, 5.6, 7.8])
     }
 
     func testSubscripts() {
