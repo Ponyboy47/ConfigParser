@@ -108,7 +108,7 @@ extension Float80: ConfigStorable {
 
 extension Array: ConfigRetrievable where Element: ConfigRetrievable {
     public static func from(value: ConfigSection.Value) -> [Element]? {
-        var items = Array<Element>()
+        var items = [Element]()
         for item in value.components(separatedBy: ",") {
             guard let val = Element.from(value: item.trimmingCharacters(in: .whitespaces)) else { return nil }
             items.append(val)
@@ -119,6 +119,6 @@ extension Array: ConfigRetrievable where Element: ConfigRetrievable {
 
 extension Array: ConfigStorable where Element: ConfigStorable {
     public func toValue() -> ConfigSection.Value {
-        return map({ $0.toValue() }).joined(separator: ", ")
+        return map { $0.toValue() }.joined(separator: ", ")
     }
 }

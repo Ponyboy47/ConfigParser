@@ -18,8 +18,7 @@ public struct ParserOptions {
 
     public init(commentCharacters: Set<Character> = ParserOptions.defaultCommentCharacters,
                 keyValueSeparator: Character = ParserOptions.defaultKeyValueSeparator,
-                fileEncoding: String.Encoding = ParserOptions.defaultFileEncoding
-               ) {
+                fileEncoding: String.Encoding = ParserOptions.defaultFileEncoding) {
         self.commentCharacters = commentCharacters
         self.keyValueSeparator = keyValueSeparator
         self.fileEncoding = fileEncoding

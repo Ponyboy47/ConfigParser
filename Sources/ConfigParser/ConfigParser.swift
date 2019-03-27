@@ -1,7 +1,7 @@
+import struct Foundation.CharacterSet
 import struct TrailBlazer.FilePath
 import class TrailBlazer.Open
 import typealias TrailBlazer.OpenFile
-import struct Foundation.CharacterSet
 
 /// A type used to parse a string or file into a Config object
 public struct ConfigParser {
@@ -18,10 +18,12 @@ public struct ConfigParser {
     private lazy var invalidSectionCharacters = {
         Set([ConfigParser.SectionStart, options.keyValueSeparator]).union(options.commentCharacters)
     }()
+
     /// Character not permitted in either a key or a value
     private lazy var invalidKeyValueCharacters = {
         Set([ConfigParser.SectionStart, ConfigParser.SectionEnd, options.keyValueSeparator]).union(options.commentCharacters)
     }()
+
     /// Characters not permitted in the global scope
     private lazy var invalidGlobalCharacters = {
         Set([ConfigParser.SectionEnd, options.keyValueSeparator])
@@ -44,12 +46,12 @@ public struct ConfigParser {
     }
 
     /**
-    Reads a config from the specified file path
+     Reads a config from the specified file path
 
-    - Parameter configPath: The FilePath to the config
-    - Parameter encoding: The encoding to use when reading the file
-    - Returns: A Config after reading the FilePath
-    */
+     - Parameter configPath: The FilePath to the config
+     - Parameter encoding: The encoding to use when reading the file
+     - Returns: A Config after reading the FilePath
+     */
     public static func read<ConfigType: INIConfig>(from configPath: FilePath, options: ParserOptions = .default) throws -> ConfigType {
         // Expand the path (in case it's relative) and then open it for reading
         let openConfig = try configPath.expanded().open(permissions: .read)
@@ -59,11 +61,11 @@ public struct ConfigParser {
     }
 
     /**
-    Parses the Parsable object, character by character, until it has generated an entire Config
+     Parses the Parsable object, character by character, until it has generated an entire Config
 
-    - Parameter parsable: A type conforming to ConfigParsable which can be read character by character
-    - Returns: A Config object
-    */
+     - Parameter parsable: A type conforming to ConfigParsable which can be read character by character
+     - Returns: A Config object
+     */
     public static func parse<ParseType: ConfigParsable, ConfigType: INIConfig>(_ parsable: ParseType, options: ParserOptions = .default) throws -> ConfigType {
         // Create our empty Config
         var config = ConfigType()
@@ -88,9 +90,9 @@ public struct ConfigParser {
                 break
             } else if parser.nextChar == ConfigParser.SectionStart {
                 currentSection = try parser.identifySectionTitle()
-                if config[currentSection] == nil
-                   && currentSection != ConfigType.GlobalsKey
-                   && currentSection != ConfigType.DefaultsKey {
+                if config[currentSection] == nil,
+                    currentSection != ConfigType.GlobalsKey,
+                    currentSection != ConfigType.DefaultsKey {
                     config._dict[currentSection] = ConfigSection(title: currentSection)
                 }
 
@@ -99,7 +101,7 @@ public struct ConfigParser {
                 throw ParserError.invalidCharacter(parser.nextChar, at: parser.position)
             } else if options.commentCharacters.contains(parser.nextChar) {
                 try parser.skipToNextLine()
-            } else if parsedSection && !CharacterSet.whitespaces.contains(parser.nextChar) {
+            } else if parsedSection, !CharacterSet.whitespaces.contains(parser.nextChar) {
                 throw ParserError.expectedNewlineOrEOF(at: parser.position)
             } else if CharacterSet.whitespaces.contains(parser.nextChar) {
                 // Do nothing if we hit whitespace in the global scope
@@ -144,7 +146,7 @@ public struct ConfigParser {
             try nextCharacter()
         }
 
-        guard sectionTitle.count > 0 else {
+        guard !sectionTitle.isEmpty else {
             throw ParserError.emptySectionTitle(at: position)
         }
 
@@ -181,7 +183,7 @@ public struct ConfigParser {
             try nextCharacter()
         }
 
-        guard key.count > 0 else {
+        guard !key.isEmpty else {
             throw ParserError.emptyKey(at: position)
         }
 
@@ -192,12 +194,12 @@ public struct ConfigParser {
     private mutating func parseValue() throws -> ConfigSection.Value {
         try nextCharacter()
         var value = ""
-        var startingQuote: Character? = nil
+        var startingQuote: Character?
         var escaped = false
         var closedQuote = false
         var whitespaces: [Character] = []
 
-        while nextChar != .ETX && !CharacterSet.newlines.contains(nextChar) {
+        while nextChar != .ETX, !CharacterSet.newlines.contains(nextChar) {
             guard !invalidKeyValueCharacters.contains(nextChar) else {
                 throw ParserError.invalidCharacter(nextChar, at: position)
             }
@@ -219,7 +221,7 @@ public struct ConfigParser {
                 whitespaces = []
                 value.append(nextChar)
                 escaped = false
-            } else if !escaped && nextChar == startingQuote {
+            } else if !escaped, nextChar == startingQuote {
                 closedQuote = true
             } else {
                 escaped = false
@@ -228,7 +230,7 @@ public struct ConfigParser {
             try nextCharacter()
         }
 
-        guard value.count > 0 else {
+        guard !value.isEmpty else {
             throw ParserError.emptyValue(at: position)
         }
 
@@ -239,7 +241,7 @@ public struct ConfigParser {
     private mutating func skipToNextLine() throws {
         try nextCharacter()
 
-        while nextChar != .ETX && !CharacterSet.newlines.contains(nextChar) {
+        while nextChar != .ETX, !CharacterSet.newlines.contains(nextChar) {
             try nextCharacter()
         }
     }
@@ -250,7 +252,7 @@ public extension Character {
     static var ETX: Character { return Character(Unicode.Scalar(3)) }
 }
 
-fileprivate extension CharacterSet {
+private extension CharacterSet {
     /// Checks if the CharacterSet contains the specified Character
     func contains(_ char: Character) -> Bool {
         for scalar in char.unicodeScalars {

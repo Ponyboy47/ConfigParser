@@ -21,12 +21,12 @@ extension Open: ConfigParsable where PathType == FilePath {
     }
 
     /**
-    Reads a single byte from the file and returns the associated character
+     Reads a single byte from the file and returns the associated character
 
-    - Parameter position: The ParserPosition to where we have currently read in the file
-    - Returns: Either the next character in the file, or the ETX character if the EOF has been reached
-    - Warning: This will always throw if the file was encoded in such a way that characters are larger than one byte
-    */
+     - Parameter position: The ParserPosition to where we have currently read in the file
+     - Returns: Either the next character in the file, or the ETX character if the EOF has been reached
+     - Warning: This will always throw if the file was encoded in such a way that characters are larger than one byte
+     */
     public func nextCharacter(options: ParserOptions) throws -> Character {
         return try readCharacter(using: options.fileEncoding)
     }
@@ -34,13 +34,13 @@ extension Open: ConfigParsable where PathType == FilePath {
 
 extension String: ConfigParsable {
     /**
-    Removes the first character of the string, until it is empty, at which
-    point the ETX character is returned
+     Removes the first character of the string, until it is empty, at which
+     point the ETX character is returned
 
-    - Parameter position: The ParserPosition to where we have currently read in the string
-    - Returns: Either the first character from the string or the ETX character
-    */
-    public mutating func nextCharacter(options: ParserOptions) -> Character {
+     - Parameter position: The ParserPosition to where we have currently read in the string
+     - Returns: Either the first character from the string or the ETX character
+     */
+    public mutating func nextCharacter(options _: ParserOptions) -> Character {
         // Characters cannot be initialized from an empty string. When we have
         // finished processing the string, return the ETX character
         return isEmpty ? .ETX : removeFirst()

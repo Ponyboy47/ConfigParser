@@ -1,8 +1,8 @@
-import struct TrailBlazer.FilePath
 import struct TrailBlazer.FileMode
+import struct TrailBlazer.FilePath
 
-public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLiteral, Hashable 
-                           where Key == String, Value == ConfigSection {
+public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLiteral, Hashable
+    where Key == String, Value == ConfigSection {
     /// The array element type
     typealias Element = Value
 
@@ -23,7 +23,8 @@ public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLit
 }
 
 public extension INIConfig {
-/// pragma: Equatable & Hashable conformance
+    // MARK: Equatable & Hashable conformance
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(defaults)
         hasher.combine(globals)
@@ -34,7 +35,8 @@ public extension INIConfig {
     static func == <R: INIConfig>(lhs: Self, rhs: R) -> Bool { return lhs._dict == rhs._dict }
     static func == <L: INIConfig>(lhs: L, rhs: Self) -> Bool { return lhs._dict == rhs._dict }
 
-/// pragma: ExpressibleByDictionaryLiteral conformance
+    // MARK: ExpressibleByDictionaryLiteral conformance
+
     /// Dictionary literal initializer
     init(dictionaryLiteral elements: (Key, Value)...) {
         self.init()
@@ -45,7 +47,8 @@ public extension INIConfig {
         }
     }
 
-/// pragma: ExpressibleByArrayLiteral conformance
+    // MARK: ExpressibleByArrayLiteral conformance
+
     /// Array literal initializer
     init(arrayLiteral elements: Element...) {
         self.init()
@@ -55,18 +58,19 @@ public extension INIConfig {
         }
     }
 
-/// pragma: Dict-like functionality
+    // MARK: Dict-like functionality
+
     /// A view of the available sections in the INIConfig
     var sections: Dictionary<Key, Value>.Keys { return _dict.keys }
     /// A view of the available sections in the INIConfig
     var keys: Dictionary<Key, Value>.Keys { return sections }
 
     /**
-    Determine if the config has values for the specified section
+     Determine if the config has values for the specified section
 
-    - Parameter section: The section to search for in the config
-    - Returns: Whether or not the section exists in the config
-    */
+     - Parameter section: The section to search for in the config
+     - Returns: Whether or not the section exists in the config
+     */
     func contains(section key: Key) -> Bool { return keys.contains(key) }
 
     func section(withKey key: ConfigSection.Key) -> ConfigSection? {
@@ -80,14 +84,16 @@ public extension INIConfig {
 
     func get(default key: ConfigSection.Key) -> ConfigSection.Value? { return defaults[key] }
     func get(global key: ConfigSection.Key) -> ConfigSection.Value? { return globals[key] }
-    subscript(section key: Key, key item: ConfigSection.Key, default `default`: ConfigSection.Value) -> ConfigSection.Value {
+    subscript(section key: Key, key item: ConfigSection.Key, default default: ConfigSection.Value) -> ConfigSection.Value {
         return self[section: key, key: item] ?? `default`
     }
+
     subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key) -> T? {
         guard let value = self[section: key, key: item] else { return nil }
         return T.from(value: value)
     }
-    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default `default`: T) -> T {
+
+    subscript<T: ConfigRetrievable>(section key: Key, key item: ConfigSection.Key, default default: T) -> T {
         guard let value = self[section: key, key: item] else { return `default` }
         return T.from(value: value) ?? `default`
     }
@@ -95,16 +101,18 @@ public extension INIConfig {
     subscript(_ section: Key) -> ConfigSection? {
         return self.section(withKey: section)
     }
+
     subscript(section key: Key, key item: ConfigSection.Key) -> ConfigSection.Value? {
         return _dict[key]?[item] ?? globals[item] ?? defaults[item]
     }
 
-/// pragma: Useful file operations
+    // MARK: Useful file operations
+
     init(from configPath: FilePath, options: ParserOptions = .default) throws {
         self = try ConfigParser.read(from: configPath, options: options)
     }
 
-    func output(options: ParserOptions = .default) -> String {
+    func output(options _: ParserOptions = .default) -> String {
         var config = String()
 
         for (key, value) in globals._dict {
@@ -132,7 +140,7 @@ public extension INIConfig {
             }
         }
 
-        if !_dict.isEmpty && (!defaults.isEmpty || !globals.isEmpty) {
+        if !_dict.isEmpty, !defaults.isEmpty || !globals.isEmpty {
             config += "\n"
         }
 

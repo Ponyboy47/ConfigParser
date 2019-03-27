@@ -37,18 +37,18 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
     }
 
     /**
-    Check if the section contains a value for the specified key
+     Check if the section contains a value for the specified key
 
-    - Parameter key: The key to search for in the section
-    - Returns: Whether or not the key is contained in the section
-    */
+     - Parameter key: The key to search for in the section
+     - Returns: Whether or not the key is contained in the section
+     */
     public func contains(_ key: Key) -> Bool {
         return _dict.keys.contains(key)
     }
 
     /// Returns a value for the specified key or nil if it doesn't exist
     public subscript(key: Key) -> [Value]? {
-        get { return _dict[key]?.components(separatedBy: ",").map({ return $0.trimmingCharacters(in: .whitespaces) }) }
+        get { return _dict[key]?.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
         mutating set { _dict[key] = newValue?.joined(separator: ",") }
     }
 
