@@ -11,6 +11,10 @@ open class Config: INIConfig {
     /// Underlying storage of the Config
     public var _dict: [Key: Value] = [:]
 
+    public var keys: Dictionary<Key, Value>.Keys { return _dict.keys }
+    public var sections: Dictionary<Key, Value>.Keys { return keys }
+    public var values: Dictionary<Key, Value>.Values { return _dict.values }
+
     /// Empty initializer
     public required init() {}
 

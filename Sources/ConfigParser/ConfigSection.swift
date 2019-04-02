@@ -9,6 +9,8 @@ public struct ConfigSection: ExpressibleByDictionaryLiteral, Equatable, Hashable
     var _dict: [Key: Value]
 
     public var isEmpty: Bool { return _dict.isEmpty }
+    public var keys: Dictionary<Key, Value>.Keys { return _dict.keys }
+    public var values: Dictionary<Key, Value>.Values { return _dict.values }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(title)
