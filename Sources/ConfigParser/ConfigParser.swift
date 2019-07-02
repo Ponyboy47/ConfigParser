@@ -1,7 +1,7 @@
 import struct Foundation.CharacterSet
 import struct TrailBlazer.FilePath
+import typealias TrailBlazer.FileStream
 import class TrailBlazer.Open
-import typealias TrailBlazer.OpenFile
 
 /// A type used to parse a string or file into a Config object
 public struct ConfigParser {
@@ -37,12 +37,12 @@ public struct ConfigParser {
     private init<ParseType: ConfigParsable>(_ parsable: ParseType, options: ParserOptions) throws {
         self.parsable = parsable
         self.options = options
-        self.nextChar = try self.parsable.nextCharacter(options: self.options)
+        self.nextChar = try self.parsable.nextCharacter()
     }
 
     private mutating func nextCharacter(newline: Bool = false) throws {
         defer { newline ? position.newline() : position.step() }
-        nextChar = try parsable.nextCharacter(options: self.options)
+        nextChar = try parsable.nextCharacter()
     }
 
     /**
@@ -54,7 +54,7 @@ public struct ConfigParser {
      */
     public static func read<ConfigType: INIConfig>(from configPath: FilePath, options: ParserOptions = .default) throws -> ConfigType {
         // Expand the path (in case it's relative) and then open it for reading
-        let openConfig = try configPath.expanded().open(permissions: .read)
+        let openConfig = try configPath.expanded().open(mode: "r")
 
         // Pass the readable config to the parser
         return try ConfigParser.parse(openConfig, options: options)
