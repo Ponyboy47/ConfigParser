@@ -5,7 +5,7 @@ A pure-Swift implementation of the INI config parser
 ## Installation
 ### Swift Package Manager
 ```swift
-.package(url: "https://github.com/Ponyboy47/ConfigParser.git", from: "0.3.3")
+.package(url: "https://github.com/Ponyboy47/ConfigParser.git", from: "0.3.4")
 ```
 
 ## Usage
