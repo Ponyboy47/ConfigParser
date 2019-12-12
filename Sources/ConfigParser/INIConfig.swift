@@ -1,5 +1,5 @@
-import struct TrailBlazer.FileMode
-import struct TrailBlazer.FilePath
+import struct Pathman.FileMode
+import struct Pathman.FilePath
 
 public protocol INIConfig: ExpressibleByDictionaryLiteral, ExpressibleByArrayLiteral, Hashable
     where Key == String, Value == ConfigSection {

@@ -1,7 +1,8 @@
 import struct Foundation.CharacterSet
-import struct TrailBlazer.FilePath
-import typealias TrailBlazer.FileStream
-import class TrailBlazer.Open
+import struct Foundation.Data
+import struct Pathman.FilePath
+import typealias Pathman.FileStream
+import class Pathman.Open
 
 /// A type used to parse a string or file into a Config object
 public struct ConfigParser {
@@ -58,6 +59,19 @@ public struct ConfigParser {
 
         // Pass the readable config to the parser
         return try ConfigParser.parse(openConfig, options: options)
+    }
+
+    /**
+     Parses the Parsable object, character by character, until it has generated an entire Config
+
+     - Parameter parsable: A Data struct of the config data
+     - Returns: A Config object
+     */
+    public static func parse<ConfigType: INIConfig>(_ data: Data, encoding: String.Encoding = .utf8, options: ParserOptions = .default) throws -> ConfigType {
+        guard let string = String(data: data, encoding: encoding) else {
+            throw StringError.notConvertibleFromData(using: encoding)
+        }
+        return try ConfigParser.parse(string, options: options)
     }
 
     /**

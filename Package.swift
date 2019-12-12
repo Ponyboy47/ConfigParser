@@ -10,12 +10,12 @@ let package = Package(
             targets: ["ConfigParser"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Ponyboy47/TrailBlazer.git", from: "0.16.0"),
+        .package(url: "https://github.com/Ponyboy47/Pathman.git", from: "0.18.0"),
     ],
     targets: [
         .target(
             name: "ConfigParser",
-            dependencies: ["TrailBlazer"]),
+            dependencies: ["Pathman"]),
         .testTarget(
             name: "ConfigParserTests",
             dependencies: ["ConfigParser"]),

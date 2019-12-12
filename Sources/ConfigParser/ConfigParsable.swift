@@ -1,5 +1,5 @@
-import struct TrailBlazer.FilePath
-import class TrailBlazer.Open
+import struct Pathman.FilePath
+import class Pathman.Open
 
 /// Types that can be parsed by the ConfigParser, character by character, to generate a Config
 public protocol ConfigParsable {
